@@ -29,6 +29,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /*
@@ -46,7 +48,6 @@ public class DashboardQuestionsActivity extends AppCompatActivity {
     private RecyclerView recyclerQuestions;  // Componente de la interfaz
     private FloatingActionButton addQuestionButton;  // Componente de la interfaz
     private RequestQueue queue; // Cola de peticiones Volley (para peticiones HTTP)
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,15 +147,26 @@ public class DashboardQuestionsActivity extends AppCompatActivity {
      */
     private void refreshQuestionsRecyclerView(List<QuestionDto> questions) {
 
-        // Creamos el Adapter pasándole la lista de preguntas
+        // 2🆎 
+        // Comentario --> getTitle
+        // Usuario --> getAuthor
+        if (questions != null && !questions.isEmpty()) {
+
+            Collections.sort(questions, new Comparator<QuestionDto>() {
+                @Override
+                public int compare(QuestionDto q1, QuestionDto q2) {
+                    return q1.getTitle().compareToIgnoreCase(q2.getTitle()); // (A-Z)
+                //  return q2.getTitle().compareToIgnoreCase(q1.getTitle());    (Z-A)
+                }
+            });
+        }
+        //.
+
         QuestionsRecyclerAdapter adapter = new QuestionsRecyclerAdapter(questions);
-
-        // Asignamos el adapter al RecyclerView
         recyclerQuestions.setAdapter(adapter);
-
-        // Indicamos que el RecyclerView será en formato lista vertical
         recyclerQuestions.setLayoutManager(new LinearLayoutManager(this));
     }
+
 
     /*
      * METODO --> Muestra el diálogo para crear una nueva pregunta
