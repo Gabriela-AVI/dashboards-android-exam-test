@@ -1,13 +1,11 @@
 package com.afundacion.fp.coruna.dashboards.activities;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -33,24 +31,39 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/*
+ * Esta Activity muestra todas las preguntas de un Dashboard concreto.
+ * Recibe el ID del dashboard por Intent.
+ * Hace una petición al servidor para obtener sus preguntas.
+ * Las muestra en un RecyclerView.
+ * Permite añadir nuevas preguntas mediante un diálogo.
+ */
 public class DashboardQuestionsActivity extends AppCompatActivity {
-    public static final String INTENT_DASHBOARD_ID = "D_ID";
-    private Context context = this;
-    private ProgressBar progressBar;
-    private RecyclerView recyclerQuestions;
-    private FloatingActionButton addQuestionButton;
-    private RequestQueue queue;
+
+    public static final String INTENT_DASHBOARD_ID = "D_ID";  // Clave para recibir el ID del dashboard desde otra Activity
+    private Context context = this; // Guardamos el contexto de la Activity
+    private ProgressBar progressBar; // Componente de la interfaz
+    private RecyclerView recyclerQuestions;  // Componente de la interfaz
+    private FloatingActionButton addQuestionButton;  // Componente de la interfaz
+    private RequestQueue queue; // Cola de peticiones Volley (para peticiones HTTP)
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Cargamos el layout XML asociado a esta Activity
         setContentView(R.layout.activity_questions);
+
+        // Inicializamos la cola de peticiones Volley
         queue = Volley.newRequestQueue(this);
+
+        // Conectamos los componentes del XML con el código Java
         progressBar = findViewById(R.id.progressBarDashboardQuestions);
         recyclerQuestions = findViewById(R.id.recyclerQuestions);
         addQuestionButton = findViewById(R.id.buttonAddQuestionDialog);
 
+        // Cuando se pulsa el botón flotante, se abre el diálogo para crear pregunta
         addQuestionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -58,34 +71,64 @@ public class DashboardQuestionsActivity extends AppCompatActivity {
             }
         });
 
+        // Nada más iniciar la Activity, cargamos las preguntas
         loadQuestions();
     }
 
+    /*
+     * METODO --> carga las preguntas del dashboard desde el servidor
+     */
     private void loadQuestions() {
+
+        // Activamos modo carga (muestra ProgressBar y oculta contenido)
         setLoading(true);
+
+        // Recuperamos el ID del dashboard que nos enviaron por Intent
         int dashboardId = getIntent().getIntExtra(INTENT_DASHBOARD_ID, -1);
+
+        // Creamos la petición GET al servidor
         JsonObjectRequest request = new JsonObjectRequest(
                 Request.Method.GET,
                 Server.BASE_URL + "/api/v2/dashboards/" + dashboardId,
                 null,
+
+                // Si la respuesta es correcta
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject jsonObject) {
+
+                        // Quitamos el modo carga
                         setLoading(false);
+
                         try {
+                            // Lista donde guardaremos las preguntas convertidas
                             List<QuestionDto> questionsList = new ArrayList<>();
+
+                            // Obtenemos el array JSON llamado "questions"
                             JSONArray jsonQuestions = jsonObject.getJSONArray("questions");
+
+                            // Recorremos todas las preguntas recibidas
                             for (int i = 0; i < jsonQuestions.length(); i++) {
+
+                                // Obtenemos cada objeto JSON individual
                                 JSONObject jsonQuestion = jsonQuestions.getJSONObject(i);
+
+                                // Convertimos JSON a objeto QuestionDto
                                 QuestionDto question = new QuestionDto(jsonQuestion);
+
+                                // Añadimos a la lista
                                 questionsList.add(question);
                             }
+                            // Actualizamos el RecyclerView con las preguntas
                             refreshQuestionsRecyclerView(questionsList);
+
                         } catch (JSONException e) {
+                            // Si ocurre un error al parsear el JSON
                             Toast.makeText(context, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     }
                 },
+                // Si ocurre un error en la petición (por ejemplo sin internet)
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError volleyError) {
@@ -94,33 +137,66 @@ public class DashboardQuestionsActivity extends AppCompatActivity {
                     }
                 }
         );
+        // Añadimos la petición a la cola para que se ejecute
         queue.add(request);
     }
 
+    /*
+     * METODO --> configura el RecyclerView con la lista de preguntas
+     */
     private void refreshQuestionsRecyclerView(List<QuestionDto> questions) {
+
+        // Creamos el Adapter pasándole la lista de preguntas
         QuestionsRecyclerAdapter adapter = new QuestionsRecyclerAdapter(questions);
+
+        // Asignamos el adapter al RecyclerView
         recyclerQuestions.setAdapter(adapter);
+
+        // Indicamos que el RecyclerView será en formato lista vertical
         recyclerQuestions.setLayoutManager(new LinearLayoutManager(this));
     }
 
+    /*
+     * METODO --> Muestra el diálogo para crear una nueva pregunta
+     */
     private void showNewQuestionDialog() {
+
+        // Recuperamos el ID del dashboard actual
         int dashboardId = getIntent().getIntExtra(INTENT_DASHBOARD_ID, -1);
+
+        // Creamos el diálogo pasando:
+        // - contexto
+        // - id del dashboard
+        // - listener para saber cuándo empieza y termina la petición
         NewQuestionDialog dialog = new NewQuestionDialog(context, dashboardId, new NewQuestionDialogListener() {
+
+            // Cuando empieza la petición de crear pregunta
             @Override
             public void onCreateQuestionRequestHasBeenSent() {
                 setLoading(true);
             }
-
+            // Cuando termina la petición
             @Override
             public void onCreateQuestionRequestHasFinished() {
                 setLoading(false);
+
+                // Volvemos a cargar las preguntas para refrescar la lista
                 loadQuestions();
             }
         });
+        // Construimos y mostramos el diálogo
         dialog.buildDialog().show();
     }
 
+    /*
+     * Activa o desactiva el modo carga
+     * Si loading = true:
+     *  - Se muestra el ProgressBar
+     *  - Se oculta el RecyclerView
+     *  - Se oculta el botón flotante
+     */
     private void setLoading(boolean loading) {
+
         if (loading) {
             progressBar.setVisibility(View.VISIBLE);
             recyclerQuestions.setVisibility(View.INVISIBLE);
