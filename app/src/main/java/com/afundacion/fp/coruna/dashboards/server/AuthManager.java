@@ -72,4 +72,11 @@ public class AuthManager {
     public boolean isLoggedIn() {
         return getSessionToken() != null;
     }
+
+    // 1🔒
+    public void logout() {
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.remove(TOKEN_KEY);   // Eliminamos el token guardado
+        editor.apply();             // Guardamos cambios
+    }
 }

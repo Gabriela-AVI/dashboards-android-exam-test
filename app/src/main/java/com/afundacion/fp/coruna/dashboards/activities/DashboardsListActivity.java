@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -14,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.afundacion.fp.coruna.dashboards.R;
+import com.afundacion.fp.coruna.dashboards.server.AuthManager;
 import com.afundacion.fp.coruna.dashboards.server.Server;
 import com.afundacion.fp.coruna.dashboards.server.dtos.DashboardDto;
 import com.afundacion.fp.coruna.dashboards.recyclerviews.DashboardClickListener;
@@ -45,6 +47,7 @@ public class DashboardsListActivity extends AppCompatActivity {
     private Context context = this; // Contexto de la Activity
     private ProgressBar progressBar; // Componente de la interfaz
     private RecyclerView recyclerDashboards; // Componente de la interfaz
+    private Button logoutButton; // 1🔒.Componente de interfaz
     private RequestQueue queue; // Cola de peticiones Volley
 
     @Override
@@ -60,9 +63,26 @@ public class DashboardsListActivity extends AppCompatActivity {
         // Conectamos vistas con el XML
         progressBar = findViewById(R.id.progressBarDashboards);
         recyclerDashboards = findViewById(R.id.recyclerDashboards);
+        logoutButton = findViewById(R.id.buttonLogout); // 1🔒
 
         // Cargamos los dashboards al iniciar la Activity
         loadDashboards();
+
+        // 1🔒
+        logoutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                // Borramos el token
+                AuthManager.getInstance(context).logout();
+
+                // Volvemos al Login
+                Intent intent = new Intent(context, LoginOrRegisterActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+            }
+        });
+        //.
     }
 
     /*
