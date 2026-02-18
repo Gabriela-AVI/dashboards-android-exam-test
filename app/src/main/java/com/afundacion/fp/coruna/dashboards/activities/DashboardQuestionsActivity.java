@@ -3,7 +3,10 @@ package com.afundacion.fp.coruna.dashboards.activities;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -53,6 +56,13 @@ public class DashboardQuestionsActivity extends AppCompatActivity {
     private FloatingActionButton addQuestionButton;  // Componente de la interfaz
     private RequestQueue queue; // Cola de peticiones Volley (para peticiones HTTP)
 
+
+    private EditText etBuscardor;                                      // Barra buscador
+    private List<QuestionDto> questions = new ArrayList<>();           //  lista original
+    private List<QuestionDto> questionsFiltered = new ArrayList<>();   //  lista filtrada
+    private QuestionsRecyclerAdapter adapter;                          // adapter reutilizable
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,6 +77,7 @@ public class DashboardQuestionsActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBarDashboardQuestions);
         recyclerQuestions = findViewById(R.id.recyclerQuestions);
         addQuestionButton = findViewById(R.id.buttonAddQuestionDialog);
+        etBuscardor = findViewById(R.id.etBuscador); // 6
 
         // Cuando se pulsa el botón flotante, se abre el diálogo para crear pregunta
         addQuestionButton.setOnClickListener(new View.OnClickListener() {
@@ -74,6 +85,20 @@ public class DashboardQuestionsActivity extends AppCompatActivity {
             public void onClick(View v) {
                 showNewQuestionDialog();
             }
+        });
+
+        //🔎 6 Buscador dinámico
+        etBuscardor.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filterQuestions(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
         });
 
         // Nada más iniciar la Activity, cargamos las preguntas
@@ -149,24 +174,30 @@ public class DashboardQuestionsActivity extends AppCompatActivity {
     /*
      * METODO --> configura el RecyclerView con la lista de preguntas
      */
-    private void refreshQuestionsRecyclerView(List<QuestionDto> questions) {
+    private void refreshQuestionsRecyclerView(List<QuestionDto> questionsList) {
 
-        // 2🆎 
-        // Comentario --> getTitle
-        // Usuario --> getAuthor
-        if (questions != null && !questions.isEmpty()) {
+        // 2🆎
+        if (questionsList != null && !questionsList.isEmpty()) {
 
-            Collections.sort(questions, new Comparator<QuestionDto>() {
+            Collections.sort(questionsList, new Comparator<QuestionDto>() {
                 @Override
                 public int compare(QuestionDto q1, QuestionDto q2) {
                     return q1.getTitle().compareToIgnoreCase(q2.getTitle()); // (A-Z)
-                //  return q2.getTitle().compareToIgnoreCase(q1.getTitle());    (Z-A)
+        //          return q2.getTitle().compareToIgnoreCase(q1.getTitle());    (Z-A)
                 }
             });
         }
-        //.
 
-        QuestionsRecyclerAdapter adapter = new QuestionsRecyclerAdapter(questions);
+        // Guardamos lista original
+        this.questions.clear();
+        this.questions.addAll(questionsList);
+
+        // Copiamos a lista filtrada
+        questionsFiltered.clear();
+        questionsFiltered.addAll(this.questions);
+
+        //6🔎 Creamos adapter UNA SOLA VEZ
+        adapter = new QuestionsRecyclerAdapter(questionsFiltered);
 
         //5🐸
         // Configuramos el listener de click
@@ -178,11 +209,33 @@ public class DashboardQuestionsActivity extends AppCompatActivity {
                 context.startActivity(intent);
             }
         });
-        //.
-        recyclerQuestions.setAdapter(adapter);
+
         recyclerQuestions.setLayoutManager(new LinearLayoutManager(this));
+        recyclerQuestions.setAdapter(adapter);
     }
 
+
+    // 6🔎 METODO FILTRADO
+    private void filterQuestions(String text) {
+
+        setLoading(true);  // mostramos progress
+
+        questionsFiltered.clear();
+
+        if (text.isEmpty()) {
+            questionsFiltered.addAll(questions);
+        } else {
+            for (QuestionDto q : questions) {
+                if (q.getTitle().toLowerCase().contains(text.toLowerCase())) {
+                    questionsFiltered.add(q);
+                }
+            }
+        }
+
+        adapter.notifyDataSetChanged();
+
+        setLoading(false); // ocultamos progress
+    }
 
     /*
      * METODO --> Muestra el diálogo para crear una nueva pregunta
