@@ -1,7 +1,5 @@
 package com.afundacion.fp.coruna.dashboards.activities;
 
-// IMPORTACIONES necesarias
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -47,7 +45,7 @@ public class DashboardsListActivity extends AppCompatActivity {
     private Context context = this; // Contexto de la Activity
     private ProgressBar progressBar; // Componente de la interfaz
     private RecyclerView recyclerDashboards; // Componente de la interfaz
-    private Button logoutButton; // 1🔒.Componente de interfaz
+
     private RequestQueue queue; // Cola de peticiones Volley
 
     @Override
@@ -63,26 +61,22 @@ public class DashboardsListActivity extends AppCompatActivity {
         // Conectamos vistas con el XML
         progressBar = findViewById(R.id.progressBarDashboards);
         recyclerDashboards = findViewById(R.id.recyclerDashboards);
-        logoutButton = findViewById(R.id.buttonLogout); // 1🔒
 
         // Cargamos los dashboards al iniciar la Activity
         loadDashboards();
 
-        // 1🔒
-        logoutButton.setOnClickListener(new View.OnClickListener() {
+        //3🐧
+        Button btnProfile = findViewById(R.id.btnProfile);
+        btnProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                // Borramos el token
-                AuthManager.getInstance(context).logout();
-
-                // Volvemos al Login
-                Intent intent = new Intent(context, LoginOrRegisterActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                Intent intent = new Intent(DashboardsListActivity.this, ProfileActivity.class);
                 startActivity(intent);
+
             }
         });
-        //.
+
     }
 
     /*
