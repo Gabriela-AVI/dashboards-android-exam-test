@@ -15,6 +15,9 @@
         android:theme="@style/Theme.Dashboards"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".activities.AnswersActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.ProfileActivity"
             android:exported="false" />
         <activity

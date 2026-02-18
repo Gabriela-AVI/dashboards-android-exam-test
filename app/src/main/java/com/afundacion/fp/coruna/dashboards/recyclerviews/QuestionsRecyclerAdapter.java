@@ -1,5 +1,7 @@
 package com.afundacion.fp.coruna.dashboards.recyclerviews;
 
+import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.afundacion.fp.coruna.dashboards.R;
+import com.afundacion.fp.coruna.dashboards.activities.AnswersActivity;
 import com.afundacion.fp.coruna.dashboards.server.dtos.QuestionDto;
 
 import java.util.List;
@@ -25,9 +28,17 @@ import java.util.List;
 public class QuestionsRecyclerAdapter extends RecyclerView.Adapter<QuestionCell> {
 
     private List<QuestionDto> questions;  // Lista de preguntas que se van a mostrar
+    private Context context; // Guardamos el contexto de la Activity
+    private QuestionsClickListener clickListener; //5🐸
+
 
     public QuestionsRecyclerAdapter(List<QuestionDto> questions) {
         this.questions = questions;
+    }
+
+    //5🐸
+    public void setClickListener(QuestionsClickListener listener) {
+        this.clickListener = listener;
     }
 
     /*
@@ -63,6 +74,17 @@ public class QuestionsRecyclerAdapter extends RecyclerView.Adapter<QuestionCell>
                 question.getDescription(),
                 question.getAuthor()
         );
+
+        //5🐸
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (clickListener != null) {
+                    clickListener.onQuestionClicked(question);
+                }
+            }
+        });
     }
 
     /*

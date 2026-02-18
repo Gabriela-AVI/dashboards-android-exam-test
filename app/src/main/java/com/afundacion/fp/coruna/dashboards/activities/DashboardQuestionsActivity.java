@@ -1,6 +1,7 @@
 package com.afundacion.fp.coruna.dashboards.activities;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -13,8 +14,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.afundacion.fp.coruna.dashboards.R;
 import com.afundacion.fp.coruna.dashboards.dialogs.NewQuestionDialog;
 import com.afundacion.fp.coruna.dashboards.dialogs.NewQuestionDialogListener;
+import com.afundacion.fp.coruna.dashboards.recyclerviews.DashboardClickListener;
+import com.afundacion.fp.coruna.dashboards.recyclerviews.QuestionsClickListener;
 import com.afundacion.fp.coruna.dashboards.recyclerviews.QuestionsRecyclerAdapter;
 import com.afundacion.fp.coruna.dashboards.server.Server;
+import com.afundacion.fp.coruna.dashboards.server.dtos.DashboardDto;
 import com.afundacion.fp.coruna.dashboards.server.dtos.QuestionDto;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -163,6 +167,18 @@ public class DashboardQuestionsActivity extends AppCompatActivity {
         //.
 
         QuestionsRecyclerAdapter adapter = new QuestionsRecyclerAdapter(questions);
+
+        //5🐸
+        // Configuramos el listener de click
+        adapter.setClickListener(new QuestionsClickListener() {
+            @Override
+            public void onQuestionClicked(QuestionDto question) {
+                Intent intent = new Intent(context, AnswersActivity.class);
+                intent.putExtra("QUESTION_ID", question.getId());
+                context.startActivity(intent);
+            }
+        });
+        //.
         recyclerQuestions.setAdapter(adapter);
         recyclerQuestions.setLayoutManager(new LinearLayoutManager(this));
     }
@@ -219,4 +235,6 @@ public class DashboardQuestionsActivity extends AppCompatActivity {
             addQuestionButton.setVisibility(View.VISIBLE);
         }
     }
+
+
 }
