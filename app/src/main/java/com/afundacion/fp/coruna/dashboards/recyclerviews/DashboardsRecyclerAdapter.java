@@ -10,6 +10,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.afundacion.fp.coruna.dashboards.R;
 import com.afundacion.fp.coruna.dashboards.server.dtos.DashboardDto;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /*
@@ -33,6 +35,14 @@ public class DashboardsRecyclerAdapter extends RecyclerView.Adapter<DashboardCel
     public void setClickListener(DashboardClickListener listener) {
         this.clickListener = listener;
     }
+
+// 4🤖 ORDENAR DE MAYOR A MENOR
+//    public void sortByQuestionsDesc() {
+//    dashboards.sort((d1, d2) ->
+//            Integer.compare(d2.getQuestionsCount(), d1.getQuestionsCount())
+//    );
+//    notifyDataSetChanged();
+//     }
 
     /*
      * Cuando el RecyclerView necesita crear una nueva celda.
@@ -58,11 +68,8 @@ public class DashboardsRecyclerAdapter extends RecyclerView.Adapter<DashboardCel
     @Override
     public void onBindViewHolder(@NonNull DashboardCell holder, int position) {
 
-        // Obtenemos el dashboard correspondiente a esta posición
-        DashboardDto dashboard = dashboards.get(position);
-
-        // Asignamos el título al TextView de la celda
-        holder.setTitle(dashboard.getTitle());
+        DashboardDto dashboard = dashboards.get(position); // Obtenemos el dashboard correspondiente a esta posición
+        holder.setTitle(dashboard.getTitle()); // Asignamos el título al TextView de la celda
 
         // Configuramos el click de la fila
         holder.itemView.setOnClickListener(new View.OnClickListener() {

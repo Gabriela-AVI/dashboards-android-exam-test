@@ -45,7 +45,6 @@ public class DashboardsListActivity extends AppCompatActivity {
     private Context context = this; // Contexto de la Activity
     private ProgressBar progressBar; // Componente de la interfaz
     private RecyclerView recyclerDashboards; // Componente de la interfaz
-
     private RequestQueue queue; // Cola de peticiones Volley
 
     @Override
@@ -148,6 +147,8 @@ public class DashboardsListActivity extends AppCompatActivity {
 
         // Creamos el Adapter con la lista de dashboards
         DashboardsRecyclerAdapter adapter = new DashboardsRecyclerAdapter(dashboards);
+
+//4🤖   adapter.sortByQuestionsDesc();
 
         // Configuramos el listener de click
         adapter.setClickListener(new DashboardClickListener() {
