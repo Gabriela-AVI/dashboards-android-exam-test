@@ -18,6 +18,7 @@ import com.afundacion.fp.coruna.dashboards.server.Server;
 import com.afundacion.fp.coruna.dashboards.server.dtos.DashboardDto;
 import com.afundacion.fp.coruna.dashboards.recyclerviews.DashboardClickListener;
 import com.afundacion.fp.coruna.dashboards.recyclerviews.DashboardsRecyclerAdapter;
+import com.afundacion.fp.coruna.dashboards.server.dtos.QuestionDto;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -30,6 +31,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /*
@@ -144,6 +147,18 @@ public class DashboardsListActivity extends AppCompatActivity {
      * METODO --> configura el RecyclerView
      */
     private void refreshDashboardsRecyclerView(List<DashboardDto> dashboards) {
+
+        // 7🐣
+        if (dashboards != null && !dashboards.isEmpty()) {
+
+            Collections.sort(dashboards, new Comparator<DashboardDto>() {
+                @Override
+                public int compare(DashboardDto q1, DashboardDto q2) {
+                    return q1.getTitle().compareToIgnoreCase(q2.getTitle()); // (A-Z)
+        //          return q2.getTitle().compareToIgnoreCase(q1.getTitle());    (Z-A)
+                }
+            });
+        }
 
         // Creamos el Adapter con la lista de dashboards
         DashboardsRecyclerAdapter adapter = new DashboardsRecyclerAdapter(dashboards);
