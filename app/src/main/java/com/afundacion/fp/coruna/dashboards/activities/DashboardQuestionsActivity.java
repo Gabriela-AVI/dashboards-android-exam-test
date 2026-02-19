@@ -307,6 +307,42 @@ public class DashboardQuestionsActivity extends AppCompatActivity {
         dialog.buildDialog().show();
     }
 
+    //11🗽
+    private void deleteQuestion (QuestionDto questionDto) {
+
+        setLoading(true);
+
+        int questionId = questionDto.getId();
+
+        JsonObjectRequest request = new JsonObjectRequest(
+                Request.Method.DELETE,
+                Server.BASE_URL + "/api/v2/questions/" + questionId,
+                null,
+
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject jsonObject) {
+
+                        setLoading(false);
+
+                        Toast.makeText(context, "Pregunta eliminada", Toast.LENGTH_SHORT).show();
+
+                        loadQuestions();
+                    }
+                },
+
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError volleyError) {
+
+                        setLoading(false);
+                        Toast.makeText(context, "Error al eliminar: " + volleyError.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
+        queue.add(request);
+    }
+
     /*
      * Activa o desactiva el modo carga
      * Si loading = true:
@@ -326,6 +362,4 @@ public class DashboardQuestionsActivity extends AppCompatActivity {
             addQuestionButton.setVisibility(View.VISIBLE);
         }
     }
-
-
 }
