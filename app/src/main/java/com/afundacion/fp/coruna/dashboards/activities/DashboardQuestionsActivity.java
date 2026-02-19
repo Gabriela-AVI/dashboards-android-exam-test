@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.afundacion.fp.coruna.dashboards.R;
+import com.afundacion.fp.coruna.dashboards.dialogs.EditQuestionDialog;
 import com.afundacion.fp.coruna.dashboards.dialogs.NewQuestionDialog;
 import com.afundacion.fp.coruna.dashboards.dialogs.NewQuestionDialogListener;
 import com.afundacion.fp.coruna.dashboards.recyclerviews.DashboardClickListener;
@@ -204,9 +205,13 @@ public class DashboardQuestionsActivity extends AppCompatActivity {
         adapter.setClickListener(new QuestionsClickListener() {
             @Override
             public void onQuestionClicked(QuestionDto question) {
-                Intent intent = new Intent(context, AnswersActivity.class);
-                intent.putExtra("QUESTION_ID", question.getId());
-                context.startActivity(intent);
+//                Intent intent = new Intent(context, AnswersActivity.class);
+//                intent.putExtra("QUESTION_ID", question.getId());
+//                context.startActivity(intent);
+
+             // 9🦄
+                showEditQuestionDialog(question);
+
             }
         });
 
@@ -250,6 +255,39 @@ public class DashboardQuestionsActivity extends AppCompatActivity {
         // - id del dashboard
         // - listener para saber cuándo empieza y termina la petición
         NewQuestionDialog dialog = new NewQuestionDialog(context, dashboardId, new NewQuestionDialogListener() {
+
+            // Cuando empieza la petición de crear pregunta
+            @Override
+            public void onCreateQuestionRequestHasBeenSent() {
+                setLoading(true);
+            }
+            // Cuando termina la petición
+            @Override
+            public void onCreateQuestionRequestHasFinished() {
+                setLoading(false);
+
+                // Volvemos a cargar las preguntas para refrescar la lista
+                loadQuestions();
+            }
+        });
+        // Construimos y mostramos el diálogo
+        dialog.buildDialog().show();
+    }
+
+    // 9🦄
+    /*
+     * METODO --> Diálogo para editar una pregunta
+     */
+    private void showEditQuestionDialog(QuestionDto questionDto) {
+
+        // Recuperamos el ID del dashboard actual
+        int dashboardId = getIntent().getIntExtra(INTENT_DASHBOARD_ID, -1);
+
+        // Creamos el diálogo pasando:
+        // - contexto
+        // - id del dashboard
+        // - listener para saber cuándo empieza y termina la petición
+        EditQuestionDialog dialog = new EditQuestionDialog(context, dashboardId, questionDto ,new NewQuestionDialogListener() {
 
             // Cuando empieza la petición de crear pregunta
             @Override
