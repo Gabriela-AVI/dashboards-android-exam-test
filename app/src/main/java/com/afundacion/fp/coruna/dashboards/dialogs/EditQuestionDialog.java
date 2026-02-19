@@ -33,6 +33,8 @@ public class EditQuestionDialog {
     private RequestQueue queue; // Cola de peticiones HTTP
     private EditText editTextNewQuestionTitle; // Campo del formulario
     private EditText editTextNewQuestionDescription; // Campo del formulario
+
+//10🐩  private EditText editTextNewQuestionTime;
     private int dashboardId; // ID del dashboard donde se va a crear la pregunta
     private NewQuestionDialogListener listener; // Listener para avisar a la Activity cuando empieza/termina la petición
     private QuestionDto questionDto;
@@ -96,6 +98,7 @@ public class EditQuestionDialog {
         JSONObject requestBody = new JSONObject();
         requestBody.put("title", editTextNewQuestionTitle.getText().toString());
         requestBody.put("description", editTextNewQuestionDescription.getText().toString());
+//10🐩  requestBody.put("time", Integer.parseInt(editTextNewQuestionTime.getText().toInt());
 
         // Avisamos a la Activity que empieza la petición
         listener.onCreateQuestionRequestHasBeenSent();
